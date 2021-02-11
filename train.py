@@ -1,4 +1,6 @@
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def h(theta_0, theta_1, x):
@@ -59,7 +61,7 @@ def gd(theta_0, theta_1, h, data, alpha=1):
 def main():
     # initialize data
     x_data = [1,2,3]
-    y_data = [1,2,3]
+    y_data = [9,5,3]
     if len(sys.argv) == 3:
         print("Reading training data from files...")
         with open(sys.argv[1]) as x_data_file:
@@ -72,9 +74,14 @@ def main():
     print("y_data: {}".format(y_data))
     data = list(zip(x_data, y_data))
 
+    # initialize plot
+    fig, (plt_linreg, plt_cost) = plt.subplots(2)
+    fig.suptitle("Training Visualization")
+    plt_linreg.scatter(np.array(x_data), np.array(y_data))
+
     # set parameters
     theta_0, theta_1 = 0, 1
-    alpha = 0.03
+    alpha = 0.003
     max_repetition = 10000
     threshold = 0.0001
 
@@ -84,11 +91,21 @@ def main():
         theta_0, theta_1 = gd(theta_0, theta_1, h, data, alpha)
         if cost < threshold:
             break
-        if it % 1000 == 0:
+        if it % 100 == 0:
             print("it: {}, cost: {}".format(it, cost))
+            # plot the line
+            line_x = np.arange(min(x_data),max(x_data),0.1)
+            line_y = h(theta_0, theta_1, line_x)
+            line = plt_linreg.plot(line_x, line_y)
+            # TODO: 
+            # try to not remove the line at the last iteration
+            # <2021-02-11, David Deng> #
+            plt_cost.plot(it, cost, "-ok")
+            plt.pause(0.05)
+            line.pop(0).remove()
 
     # print result
-    
+    plt.show()
     print("cost: {}".format(get_cost(theta_0, theta_1, h, data)))
     print("theta_0: {}; theta_1: {}".format(theta_0, theta_1))
 
